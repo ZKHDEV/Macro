@@ -8,6 +8,7 @@ body{
     overflow-x: hidden;
 }
 
+/* 顶部导航栏 */
 .header{
     position: fixed;
     width: 100%;
@@ -15,10 +16,6 @@ body{
     height: 70px;
     z-index: 9999;
     /*box-shadow: 0 0 16px #E0E0E0;*/
-}
-
-.content{
-    padding-top: 100px;
 }
 
 .logo{
@@ -104,11 +101,16 @@ body{
     margin-right: 10px;
 }
 
-/* Content */
+/* 正文 */
+.content{
+    padding-top: 100px;
+}
+
 .module>p.title{
     font-size: 20px;
 }
 
+/* 最爱站点模块 */
 .fav-list{
     display: inline-block;
     list-style: none;
@@ -147,6 +149,8 @@ body{
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* 书签栏模块 */
 
 .cate-list{
     list-style: none;
@@ -248,7 +252,7 @@ body{
     top: -13px;
 }
 
-/* Footer */
+/* 底部信息栏 */
 .footer{
     margin-top: 50px;
     height: 60px;
@@ -273,7 +277,7 @@ body{
     color: #000000;
 }
 
-/* Scroll Top Btn */
+/* 返回顶部按钮 */
 .scroll-top{
     position: fixed;
     right: 30px;
@@ -298,6 +302,7 @@ body{
     text-decoration: none;
 }
 
+/* 对话框 */
 .dialog{
     position: fixed;
     height: 100%;

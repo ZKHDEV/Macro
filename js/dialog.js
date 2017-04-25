@@ -1,17 +1,24 @@
+/**
+ * 对话框组件
+ */
+
 // 模态框抽象类
 var Modal = function () {
+    // 组件根元素
     this.element = null;
 }
 
-// 对话框
+// 对话框组件
 var Dialog = function (title) {
     Modal.call(this);
     this.title = title;
     this.form = null;
+    this.content = null;
+    this.container = null;
     this.init();
 }
-
 Dialog.prototype = {
+    // 初始化
     init: function () {
         this.element = document.createElement('div');
         this.element.className = 'dialog';
@@ -21,10 +28,11 @@ Dialog.prototype = {
         header.innerHTML = this.title;
         this.content.appendChild(header);
     },
+    // 构建对话框
     build: function () {
-        var container = document.createElement('div');
-        container.className = 'container-fluid dialog-content';
-        container.appendChild(this.content);
+        this.container = document.createElement('div');
+        this.container.className = 'container-fluid dialog-content';
+        this.container.appendChild(this.content);
         var dialogBack = document.createElement('div');
         dialogBack.className = 'dialog-bg';
         var that = this;
@@ -32,24 +40,30 @@ Dialog.prototype = {
             that.hide();
         }
         this.element.appendChild(dialogBack);
-        this.element.appendChild(container);
+        this.element.appendChild(this.container);
         this.hide();
         document.getElementsByClassName('dialog-field')[0].appendChild(this.element);
         return this;
     },
+    // 添加组件
     add: function (child) {
         this.form = this.content.appendChild(child.getElement());
         return this;
     },
+    // 隐藏对话框
     hide: function () {
         this.element.style.display = 'none';
     },
+    // 显示对话框
     show: function () {
         this.element.style.display = 'block';
+        console.log(this.container.clientHeight);
+        this.container.style.top = (Utils.getClientHeight() - this.container.clientHeight)/2 + 'px';     
     }
 }
 
-var Form = function (id, action, type, hasFile) {
+// 对话框表单组件
+var DialogForm = function (id, action, type, hasFile) {
     Modal.call(this);
     this.id = id;
     this.action = action;
@@ -57,8 +71,7 @@ var Form = function (id, action, type, hasFile) {
     this.hasFile = hasFile;
     this.init();
 }
-
-Form.prototype = {
+DialogForm.prototype = {
     init: function () {
         this.element = document.createElement('form');
         this.id && (this.element.id = this.id);
@@ -71,14 +84,17 @@ Form.prototype = {
         this.buttonGroup = document.createElement('div');
         this.buttonGroup.className = 'dialog-btn-group';
     },
+    // 添加input组件
     addInput: function (child) {
         this.inputContainer.appendChild(child.getElement());
         return this;
     },
+    // 添加按钮
     addButton: function (child) {
         this.buttonGroup.appendChild(child.getElement());
         return this;
     },
+    // 构建并获取当前组件
     getElement: function () {
         var buttonContainer = document.createElement('div');
         buttonContainer.className = 'col-md-12';
@@ -96,7 +112,8 @@ Form.prototype = {
     }
 }
 
-var TextInput = function (id, className, name, type, label, placeholder, value) {
+// 对话框文本输入框组件
+var DialogTextInput = function (id, className, name, type, label, placeholder, value) {
     Modal.call(this);
     this.id = id;
     this.className = className;
@@ -107,7 +124,7 @@ var TextInput = function (id, className, name, type, label, placeholder, value) 
     this.value = value;
     this.init();
 }
-TextInput.prototype = {
+DialogTextInput.prototype = {
     init: function () {
         this.element = document.createElement('div');
         this.element.className = 'dialog-input-group';
@@ -123,12 +140,14 @@ TextInput.prototype = {
         this.element.appendChild(label);
         this.element.appendChild(input);
     },
+    // 获取当前组件
     getElement: function () {
         return this.element;
     }
 }
 
-var Button = function (id, className, type, value) {
+// 对话框按钮组件
+var DialogButton = function (id, className, type, value) {
     Modal.call(this);
     this.id = id;
     this.className = className;
@@ -136,7 +155,7 @@ var Button = function (id, className, type, value) {
     this.value = value;
     this.init();
 }
-Button.prototype = {
+DialogButton.prototype = {
     init: function () {
         this.element = document.createElement('button');
         this.id && (this.element.id = this.id);
@@ -144,48 +163,53 @@ Button.prototype = {
         this.element.type = this.type ? this.type : 'button';
         this.value && (this.element.innerHTML = this.value);
     },
+    // 获取当前组件
     getElement: function () {
         return this.element;
     },
+    // 为按钮注册事件监听器
     bindEvent: function (type, fn) {
         Utils.addEvent(this.element, type, fn);
         return this;
     }
 }
 
-// 单例模式、懒加载、缓存机制
+// 对话框工厂类（使用单例模式、惰性模式、缓存机制）
 var DialogFactory = (function () {
+    // 缓存已创建对话框
     var cache = {};
+    // 对话框生成库
     var component = {
         'login': (function () {
             var dialog = new Dialog('登录');
             dialog.add(
-                new Form('login-form', 'login.action', 'post', false).
-                    addInput(new TextInput('', '', '', 'text', '用户名', '', '')).
-                    addInput(new TextInput('', '', '', 'password', '密码', '', '')).
-                    addButton(new Button('', '', '', '取消').bindEvent('click', function () {
+                new DialogForm('login-form', 'login.action', 'post', false).
+                    addInput(new DialogTextInput('', '', '', 'text', '用户名', '', '')).
+                    addInput(new DialogTextInput('', '', '', 'password', '密码', '', '')).
+                    addButton(new DialogButton('', '', '', '取消').bindEvent('click', function () {
                         dialog.hide();
                     })).
-                    addButton(new Button('', '', 'submit', '登录'))
+                    addButton(new DialogButton('', '', 'submit', '登录'))
             );
             return dialog;
         })(),
         'register': (function () {
             var dialog = new Dialog('注册');
             dialog.add(
-                new Form('register-form', 'register.action', 'post', false).
-                    addInput(new TextInput('', '', '', 'text', '用户名', '', '')).
-                    addInput(new TextInput('', '', '', 'password', '密码', '', '')).
-                    addInput(new TextInput('', '', '', 'password', '再次输入密码', '', '')).
-                    addButton(new Button('', '', '', '取消').bindEvent('click', function () {
+                new DialogForm('register-form', 'register.action', 'post', false).
+                    addInput(new DialogTextInput('', '', '', 'text', '用户名', '', '')).
+                    addInput(new DialogTextInput('', '', '', 'password', '密码', '', '')).
+                    addInput(new DialogTextInput('', '', '', 'password', '再次输入密码', '', '')).
+                    addButton(new DialogButton('', '', '', '取消').bindEvent('click', function () {
                         dialog.hide();
                     })).
-                    addButton(new Button('', '', 'submit', '注册'))
+                    addButton(new DialogButton('', '', 'submit', '注册'))
             );
             return dialog;
         })()
     }
     return {
+        // 获取缓存对话框或新建对话框
         get: function (name) {
             cache[name] || (cache[name] = component[name].build());
             return cache[name];
